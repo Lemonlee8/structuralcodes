@@ -3,13 +3,14 @@
 import types
 import typing as t
 
-from . import ec2_2004, ec2_2023, mc2010, mc2020
+from . import ec2_2004, ec2_2023, gb50010, mc2010, mc2020
 
 __all__ = [
     'mc2010',
     'mc2020',
     'ec2_2023',
     'ec2_2004',
+    'gb50010',
     'set_design_code',
     'get_design_codes',
     'set_national_annex',
@@ -27,6 +28,7 @@ _DESIGN_CODES = {
     'mc2020': mc2020,
     'ec2_2004': ec2_2004,
     'ec2_2023': ec2_2023,
+    'gb50010': gb50010,
 }
 
 

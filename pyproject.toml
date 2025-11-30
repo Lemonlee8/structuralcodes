@@ -69,3 +69,8 @@ convention = "google"
 docstring-quotes = "double"
 inline-quotes = "single"
 multiline-quotes = "double"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]

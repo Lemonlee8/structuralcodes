@@ -9,12 +9,34 @@ import structuralcodes
 
 @pytest.mark.parametrize(
     'design_code_to_set',
-    ['mc2010', 'MC2010', 'mC2010', None],
+    ['mc2010', 'MC2010', 'mC2010', 'gb50010', None],
 )
 def test_set_design_code(design_code_to_set):
     """Test setting the design code."""
     # Arrange
     expected_design_code_title = 'fib Model Code 2010'
+
+    # Act
+    structuralcodes.set_design_code(design_code_to_set)
+
+    # Assert
+    if design_code_to_set is not None:
+        assert isinstance(structuralcodes.codes._CODE, types.ModuleType)
+        assert (
+            structuralcodes.codes._CODE.__title__ == expected_design_code_title
+        )
+    else:
+        assert structuralcodes.codes._CODE is None
+
+
+@pytest.mark.parametrize(
+    'design_code_to_set',
+    ['gb50010', None],
+)
+def test_set_CN_design_code(design_code_to_set):
+    """Test setting the design code."""
+    # Arrange
+    expected_design_code_title = 'Chinese Code GB50010-2010'
 
     # Act
     structuralcodes.set_design_code(design_code_to_set)
