@@ -38,6 +38,72 @@ Delta_c = {
 # }
 
 
+def fck(fcuk: float) -> float:
+    """Convert the characteristic compressive strength of concrete cubes to
+    that of concrete cylinders.
+
+    Chinese Code GB50010-2010, 4.1.3.
+
+    Args:
+        fcuk (float): The characteristic compressive strength of concrete cubes
+            in MPa.
+
+    Returns:
+        float: The standard value of axial compressive strength in MPa.
+    """
+
+    def alph1(x):
+        if x <= 50:
+            return 0.76
+        if 50 < x < 80:
+            return 0.76 + (0.82 - 0.76) * (x - 50) / 30
+        return 0.82
+
+    def alph2(x):
+        if x <= 40:
+            return 1.0
+        if 40 < x < 80:
+            return 1.0 - (1 - 0.87) * (x - 40) / 40
+        return 0.87
+
+    return 0.85 * alph1(fcuk) * alph2(fcuk) * abs(fcuk)
+
+
+def ftk(
+    fcuk: float,
+    delta: t.Literal[
+        'C15', 'C20', 'C25', 'C30', 'C35', 'C40', 'C45', 'C50', 'C60'
+    ],
+) -> float:
+    """Compute the characteristic tensile strength of concrete from the
+    characteristic compressive strength of concrete cubes.
+
+    Chinese Code GB50010-2010, 4.1.3.
+
+    Args:
+        fcuk (float): The characteristic compressive strength of concrete cubes in MPa.
+        delta (str): The concrete grade.
+
+    Returns:
+        float: The characteristic tensile strength in MPa.
+    """
+
+    def alph2(x):
+        if x <= 40:
+            return 1.0
+        if 40 < x < 80:
+            return 1.0 - (1 - 0.87) * (x - 40) / 40
+        return 0.87
+
+    return (
+        0.88
+        * 0.395
+        * fcuk ** (0.55)
+        * (1 - 1.645 * Delta_c[delta] / 100) ** 0.45
+        * alph2(fcuk)
+    )
+
+
 def fcm(
     fck: float,
     delta: t.Literal[
@@ -50,7 +116,7 @@ def fcm(
     Chinese Code GB50010-2010, C.2.1.
 
     Args:
-        fck (float): The characteristic compressive strength in MPa.
+        fck (float): The standard value of axial compressive strength in MPa.
 
     Keyword Args:
         delta (str): The concrete grade.
@@ -73,7 +139,7 @@ def fctm(
     Chinese Code GB50010-2010, C.2.1.
 
     Args:
-        ftk (float): The characteristic compressive strength in MPa.
+        ftk (float): The characteristic tensile strength in MPa.
 
     Keyword Args:
         delta (str): The concrete grade.
@@ -131,32 +197,23 @@ def fctm(
 #     return 73 * fcm(fck) ** 0.18
 
 
-# def Eci(
-#     fcm: float,
-#     agg_type: t.Literal[
-#         'basalt', 'quartzite', 'limestone', 'sandstone'
-#     ] = 'quartzite',
-#     EC0: float = 21500,
-# ) -> float:
-#     """Calculate the modulus of elasticity for normal weight concrete at 28
-#     days.
+def Eci(
+    fcuk: float,
+) -> float:
+    """Calculate the modulus of elasticity for normal weight concrete at 28
+    days.
 
-#     Defined in fib Model Code 2010 (2013), Eq. 5.1-21.
+    Defined in GB50010-2010, 4.1.5.
 
-#     Args:
-#         fcm (float): The mean value of the compressive strength of the
-#             concrete in MPa.
+    Args:
+        fcuk (float): The characteristic compressive strength of the
+            concrete in MPa where concrete cubes of 150 mm size are used.
 
-#     Keyword Args:
-#         agg_type (str): Type of coarse grain aggregate used in the concrete.
-#             Choices are: 'basalt', 'quartzite', 'limestone', 'sandstone'.
-#         EC0 (float): Initial value of modulus of elasticity in MPa.
-
-#     Returns:
-#         float: The modulus of elasticity for normal weight concrete at 28 days
-#         in MPa.
-#     """
-#     return EC0 * ALPHA_E[agg_type.lower()] * (fcm / 10) ** (1 / 3)
+    Returns:
+        float: The modulus of elasticity for normal weight concrete at 28 days
+        in MPa.
+    """
+    return 10 ^ 5 / (2.2 + 34.7 / fcuk)
 
 
 # def beta_cc(
