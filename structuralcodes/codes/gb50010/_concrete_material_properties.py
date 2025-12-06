@@ -150,8 +150,6 @@ def fctm(
     return abs(ftk) / (1 - 1.645 * Delta_c[delta] / 100)
 
 
-# todo: xxxx
-
 # def fctkmin(fctm: float) -> float:
 #     """Compute the lower bound value of the characteristic tensile strength
 #     from the mean tensile strength.
@@ -453,60 +451,62 @@ def fcd(fck: float, gamma_c: float = 1.4) -> float:
 #     return eps_clim(fck)
 
 
-# def eps_c2(fck: float) -> float:
-#     """The strain at maximum compressive stress of concrete for the
-#     parabolic-rectangular law.
+def eps_c2(fck: float) -> float:
+    """The strain at maximum compressive stress of concrete for the
+    parabolic-rectangular law.
 
-#     Defined in fib Model Code 2010 (2013), Table 7.2-1
+    (Not translated yet in GB50010))
 
-#     Args:
-#         fck (float): The characteristic compressive strength of concrete in
-#             MPa.
+    Defined in fib Model Code 2010 (2013), Table 7.2-1
 
-#     Returns:
-#         float: The strain at maximum compressive stress, absolute value, no
-#         unit.
-#     """
-#     fck = abs(fck)
-#     return (
-#         2.0 / 1000 if fck <= 50 else (2.0 + 0.085 * (fck - 50) ** 0.53) / 1000
-#     )
+    Args:
+        fck (float): The characteristic compressive strength of concrete in
+            MPa.
 
-
-# def eps_cu2(fck: float) -> float:
-#     """The ultimate strain of the parabolic-rectangular law.
-
-#     Defined in fib Model Code 2010 (2013), Table 7.2-1
-
-#     Args:
-#         fck (float): The characteristic compressive strength of concrete in
-#             MPa.
-
-#     Returns:
-#         float: The ultimate strain, absolute value, no unit.
-#     """
-#     fck = abs(fck)
-#     return (
-#         3.5 / 1000
-#         if fck <= 50
-#         else (2.6 + 35 * ((90 - fck) / 100) ** 4) / 1000
-#     )
+    Returns:
+        float: The strain at maximum compressive stress, absolute value, no
+        unit.
+    """
+    fck = abs(fck)
+    return (
+        2.0 / 1000 if fck <= 50 else (2.0 + 0.085 * (fck - 50) ** 0.53) / 1000
+    )
 
 
-# def n_parabolic_rectangular(fck: float) -> float:
-#     """The exponent in the parabolic-rectangular law.
+def eps_cu2(fck: float) -> float:
+    """The ultimate strain of the parabolic-rectangular law.
 
-#     Defined in fib Model Code 2010 (2013), Table 7.2-1
+    Defined in fib Model Code 2010 (2013), Table 7.2-1
 
-#     Args:
-#         fck (float): The characteristic compressive strength of concrete in
-#             MPa.
+    Args:
+        fck (float): The characteristic compressive strength of concrete in
+            MPa.
 
-#     Returns:
-#         float: The exponent n, absolute value, no unit.
-#     """
-#     fck = abs(fck)
-#     return 2.0 if fck <= 50 else (1.4 + 23.4 * ((90 - fck) / 100) ** 4)
+    Returns:
+        float: The ultimate strain, absolute value, no unit.
+    """
+    fck = abs(fck)
+    return (
+        3.5 / 1000
+        if fck <= 50
+        else (2.6 + 35 * ((90 - fck) / 100) ** 4) / 1000
+    )
+
+
+def n_parabolic_rectangular(fck: float) -> float:
+    """The exponent in the parabolic-rectangular law.
+
+    Defined in fib Model Code 2010 (2013), Table 7.2-1
+
+    Args:
+        fck (float): The characteristic compressive strength of concrete in
+            MPa.
+
+    Returns:
+        float: The exponent n, absolute value, no unit.
+    """
+    fck = abs(fck)
+    return 2.0 if fck <= 50 else (1.4 + 23.4 * ((90 - fck) / 100) ** 4)
 
 
 # def eps_c3(fck: float) -> float:

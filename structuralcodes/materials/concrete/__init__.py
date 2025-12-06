@@ -7,6 +7,7 @@ from structuralcodes.codes import _use_design_code
 from ._concrete import Concrete
 from ._concreteEC2_2004 import ConcreteEC2_2004
 from ._concreteEC2_2023 import ConcreteEC2_2023
+from ._concreteGB50010 import ConcreteGB50010
 from ._concreteMC2010 import ConcreteMC2010
 
 __all__ = [
@@ -15,12 +16,14 @@ __all__ = [
     'ConcreteMC2010',
     'ConcreteEC2_2023',
     'ConcreteEC2_2004',
+    'ConcreteGB50010',
 ]
 
 CONCRETES: t.Dict[str, Concrete] = {
     'fib Model Code 2010': ConcreteMC2010,
     'EUROCODE 2 1992-1-1:2004': ConcreteEC2_2004,
     'EUROCODE 2 1992-1-1:2023': ConcreteEC2_2023,
+    'Chinese Code GB50010-2010': ConcreteGB50010,
 }
 
 

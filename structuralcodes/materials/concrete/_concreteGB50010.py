@@ -2,6 +2,8 @@
 
 import typing as t
 
+from structuralcodes.codes import gb50010
+
 from ..constitutive_laws import ConstitutiveLaw, create_constitutive_law
 from ._concrete import Concrete
 
@@ -178,3 +180,180 @@ class ConcreteGB50010(Concrete):
                 'The provided constitutive law is not valid for concrete.'
             )
         self._apply_initial_strain()
+
+    def __post_init__(self):
+        """Validator for the attributes that are set in the constructor."""
+        # fcm
+        if self._fcm is not None and self._fcm <= self._fck:
+            raise ValueError(
+                (
+                    'Mean compressive strength cannot be lower than',
+                    'characteristic strength.\n',
+                    'Current characteristing strength: ',
+                    f'fck = {self._fck}.',
+                    f'Current value: value = {self._fcm}',
+                )
+            )
+
+        # Eci
+        if self._Eci is not None and (self._Eci < 1e4 or self._Eci > 1e5):
+            warnings.warn(
+                'A suspect value of Eci has been input.\n'
+                f'Please check Eci that should be in MPa ({self._Eci} given).'
+            )
+
+        # fctm
+        if self._fctm is not None and self._fctm > 0.5 * self._fck:
+            warnings.warn(
+                'A suspect value of fctm has been input. Please check.'
+            )
+
+        # eps_c1
+        if self._eps_c1 is not None and abs(self._eps_c1) >= 0.1:
+            warnings.warn(
+                'A suspect value is input for eps_c1 that should be a pure'
+                f' number without units. Please check ({self._eps_c1} given).'
+            )
+
+        # eps_cu1
+        if self._eps_cu1 is not None and abs(self._eps_cu1) >= 0.1:
+            warnings.warn(
+                'A suspect value is input for eps_cu1 that should be a pure'
+                f' number without units. Please check ({self._eps_cu1} given).'
+            )
+
+        # k_sargin
+        if self._k_sargin is not None and self._k_sargin < 0:
+            raise ValueError(
+                f'k_sargin should be a positive value ({self._k_sargin} given)'
+            )
+
+        # eps_c2
+        if self._eps_c2 is not None and abs(self._eps_c2) >= 0.1:
+            warnings.warn(
+                'A suspect value is input for eps_c2 that should be a pure'
+                f' number without units. Please check ({self._eps_c2} given).'
+            )
+
+        # eps_cu2
+        if self._eps_cu2 is not None and abs(self._eps_cu2) >= 0.1:
+            warnings.warn(
+                'A suspect value is input for eps_cu2 that should be a pure'
+                f' number without units. Please check ({self._eps_cu2} given).'
+            )
+
+        # n_parabolic_rectangular
+        if (
+            self._n_parabolic_rectangular is not None
+            and self._n_parabolic_rectangular < 0
+        ):
+            raise ValueError(
+                'n should be a positive value '
+                f'({self._n_parabolic_rectangular} given)'
+            )
+        if (
+            self._n_parabolic_rectangular is not None
+            and self._n_parabolic_rectangular >= 5
+        ):
+            warnings.warn(
+                'A suspect value is input for n_parabolic_rectangular. Please '
+                'check '
+                f'({self._n_parabolic_rectangular} given).'
+            )
+
+        # eps_c3
+        if self._eps_c3 is not None and abs(self._eps_c3) >= 0.1:
+            warnings.warn(
+                'A suspect value is input for eps_c3 that should be a pure'
+                f' number without units. Please check ({self._eps_c3} given).'
+            )
+
+        # eps_cu3
+        if self._eps_cu3 is not None and abs(self._eps_cu3) >= 0.1:
+            warnings.warn(
+                'A suspect value is input for eps_cu3 that should be a pure'
+                f' number without units. Please check ({self._eps_cu3} given).'
+            )
+
+    @property
+    def gamma_c(self) -> float:
+        """The partial factor for concrete."""
+        return self._gamma_c or 1.4
+
+    def fcd(self) -> float:
+        """Return the design compressive strength in MPa.
+
+        Returns:
+            float: The design compressive strength of concrete in MPa.
+        """
+        # This method should perhaps become a property, but is left as a method
+        # for now, to be consistent with other concretes.
+        return gb50010.fcd(self.fck, gamma_c=self.gamma_c)
+
+    @property
+    def eps_c2(self) -> float:
+        """Returns the strain at maximum compressive strength of concrete (fcd)
+        for the Parabola-rectangle constitutive law.
+
+        Returns:
+            float: The strain at maximum compressive strength of concrete.
+
+        Note:
+            The returned value is derived from fck if eps_c2 is not manually
+            provided when initializing the object.
+        """
+        if self._eps_c2 is None:
+            return gb50010.eps_c2(self.fck)
+        return self._eps_c2
+
+    @property
+    def eps_cu2(self) -> float:
+        """Returns the strain at concrete failure of concrete for the
+        Parabola-rectangle constitutive law.
+
+        Returns:
+            float: The maximum strain at failure of concrete.
+
+        Note:
+            The returned value is derived from fck if eps_cu2 is not manually
+            provided when initializing the object.
+        """
+        if self._eps_cu2 is None:
+            return gb50010.eps_cu2(self.fck)
+        return self._eps_cu2
+
+    @property
+    def n_parabolic_rectangular(self) -> float:
+        """Returns the coefficient for Parabola-rectangle constitutive law.
+
+        Returns:
+            float: The exponent for Parabola-recangle law.
+
+        Note:
+            The returned value is derived from fck if n is not manually
+            provided when initializing the object.
+        """
+        if self._n_parabolic_rectangular is None:
+            return gb50010.n_parabolic_rectangular(self.fck)
+        return self._n_parabolic_rectangular
+
+    def __elastic__(self) -> dict:
+        """Returns kwargs for creating an elastic constitutive law."""
+        return {'E': self.Eci}
+
+    def __bilinearcompression__(self) -> dict:
+        """Returns kwargs for Bi-linear constitutive law."""
+        return {
+            'fc': self.fcd(),
+            'eps_c': self.eps_c3,
+            'eps_cu': self.eps_cu3,
+        }
+
+    def __parabolarectangle__(self) -> dict:
+        """Returns kwargs for creating a parabola rectangle const law."""
+        return {
+            'fc': self.fcd(),
+            'eps_0': self.eps_c2,
+            'eps_u': self.eps_cu2,
+            'n': self.n_parabolic_rectangular,
+        }
