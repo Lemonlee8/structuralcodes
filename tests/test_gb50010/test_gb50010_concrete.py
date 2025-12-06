@@ -6,7 +6,6 @@ from structuralcodes.codes import gb50010
 from structuralcodes.materials.concrete import ConcreteGB50010, create_concrete
 
 
-# todo: to be tested further
 @pytest.mark.parametrize(
     'design_code_to_set',
     [

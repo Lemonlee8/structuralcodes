@@ -7,6 +7,7 @@ from structuralcodes.codes import _use_design_code
 from ._reinforcement import Reinforcement
 from ._reinforcementEC2_2004 import ReinforcementEC2_2004
 from ._reinforcementEC2_2023 import ReinforcementEC2_2023
+from ._reinforcementGB50010 import ReinforcementGB50010
 from ._reinforcementMC2010 import ReinforcementMC2010
 
 __all__ = [
@@ -15,12 +16,14 @@ __all__ = [
     'ReinforcementMC2010',
     'ReinforcementEC2_2004',
     'ReinforcementEC2_2023',
+    'ReinforcementGB50010',
 ]
 
 REINFORCEMENTS: t.Dict[str, Reinforcement] = {
     'fib Model Code 2010': ReinforcementMC2010,
     'EUROCODE 2 1992-1-1:2004': ReinforcementEC2_2004,
     'EUROCODE 2 1992-1-1:2023': ReinforcementEC2_2023,
+    'Chinese Code GB50010-2010': ReinforcementGB50010,
 }
 
 

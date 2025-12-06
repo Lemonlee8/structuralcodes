@@ -302,6 +302,22 @@ class ConcreteGB50010(Concrete):
         return self._gamma_c or 1.4
 
     @property
+    def Eci(self) -> float:
+        """Returns the modulus of elasticity in MPa at the concrete age of 28
+        days.
+
+        Returns:
+            float: The modulus of elasticity in MPa.
+
+        Note:
+            The returned value is derived from fcuk if Eci is not manually
+            provided when initializing the object.
+        """
+        if self._Eci is None:
+            return gb50010.Eci(self.fcuk)
+        return self._Eci
+
+    @property
     def fcuk(self) -> float:
         """Return the characteristic cube strength in MPa.
 
