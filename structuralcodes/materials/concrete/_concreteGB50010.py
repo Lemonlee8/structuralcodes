@@ -11,6 +11,8 @@ from ._concrete import Concrete
 class ConcreteGB50010(Concrete):
     """Concrete implementation for GB50010-2010."""
 
+    # added values
+    _fcuk: t.Optional[float] = None
     # computed values
     _fcm: t.Optional[float] = None
     _fctm: t.Optional[float] = None
@@ -31,6 +33,7 @@ class ConcreteGB50010(Concrete):
     def __init__(
         self,
         fck: float,
+        fcuk: t.Optional[float] = None,
         name: t.Optional[str] = None,
         density: float = 2400.0,
         gamma_c: t.Optional[float] = None,
@@ -73,6 +76,8 @@ class ConcreteGB50010(Concrete):
                 existing.
 
         Keyword Arguments:
+            fcuk (Optional(float)): Characteristic cube strength in MPa if
+                concrete is not existing.
             name (Optional(str)): A descriptive name for concrete.
             density (float): Density of material in kg/m3 (default: 2400).
             gamma_c (Optional(float)): The partial factor for concrete.
@@ -133,6 +138,7 @@ class ConcreteGB50010(Concrete):
             Warning: If eps_cu3 is larger than 0.1.
         """
         del kwargs
+
         if name is None:
             name = f'C{round(fck):d}'
         super().__init__(
@@ -144,6 +150,8 @@ class ConcreteGB50010(Concrete):
             initial_stress=initial_stress,
             strain_compatibility=strain_compatibility,
         )
+        if fcuk is not None:
+            self._fcuk = abs(fcuk)
         self._alpha_cc = alpha_cc
         self._fcm = abs(fcm) if fcm is not None else None
         self._fctm = abs(fctm) if fctm is not None else None
@@ -183,6 +191,19 @@ class ConcreteGB50010(Concrete):
 
     def __post_init__(self):
         """Validator for the attributes that are set in the constructor."""
+        # fcuk
+        if (
+            self._fcuk is not None
+            and abs(gb50010.fck(self._fcuk) - self._fck) > 1.0
+        ):
+            raise ValueError(
+                (
+                    'The provided fck and fcuk are not consistent.\n',
+                    f'Provided fck = {self._fck}, ',
+                    f'fcuk = {self._fcuk}, ',
+                    f'which gives fck = {gb50010.fck(self._fcuk):.2f}.',
+                )
+            )
         # fcm
         if self._fcm is not None and self._fcm <= self._fck:
             raise ValueError(
@@ -280,6 +301,15 @@ class ConcreteGB50010(Concrete):
         """The partial factor for concrete."""
         return self._gamma_c or 1.4
 
+    @property
+    def fcuk(self) -> float:
+        """Return the characteristic cube strength in MPa.
+
+        Returns:
+            float: The characteristic cube strength of concrete in MPa.
+        """
+        return self._fcuk
+
     def fcd(self) -> float:
         """Return the design compressive strength in MPa.
 
@@ -303,7 +333,7 @@ class ConcreteGB50010(Concrete):
             provided when initializing the object.
         """
         if self._eps_c2 is None:
-            return gb50010.eps_c2(self.fck)
+            return gb50010.eps_c2(self.fcuk)
         return self._eps_c2
 
     @property
@@ -319,7 +349,7 @@ class ConcreteGB50010(Concrete):
             provided when initializing the object.
         """
         if self._eps_cu2 is None:
-            return gb50010.eps_cu2(self.fck)
+            return gb50010.eps_cu2(self.fcuk)
         return self._eps_cu2
 
     @property
@@ -334,7 +364,7 @@ class ConcreteGB50010(Concrete):
             provided when initializing the object.
         """
         if self._n_parabolic_rectangular is None:
-            return gb50010.n_parabolic_rectangular(self.fck)
+            return gb50010.n_parabolic_rectangular(self.fcuk)
         return self._n_parabolic_rectangular
 
     def __elastic__(self) -> dict:

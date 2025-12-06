@@ -451,62 +451,63 @@ def fcd(fck: float, gamma_c: float = 1.4) -> float:
 #     return eps_clim(fck)
 
 
-def eps_c2(fck: float) -> float:
+def eps_c2(fcuk: float) -> float:
     """The strain at maximum compressive stress of concrete for the
     parabolic-rectangular law.
 
-    (Not translated yet in GB50010))
-
-    Defined in fib Model Code 2010 (2013), Table 7.2-1
+    Defined in GB50010 (2024), Eq (6.2.1-4)
 
     Args:
-        fck (float): The characteristic compressive strength of concrete in
-            MPa.
+        fcuk (float): The characteristic compressive strength of concrete in
+            MPa. (cube strength)
 
     Returns:
         float: The strain at maximum compressive stress, absolute value, no
         unit.
     """
-    fck = abs(fck)
-    return (
-        2.0 / 1000 if fck <= 50 else (2.0 + 0.085 * (fck - 50) ** 0.53) / 1000
-    )
+    _fcuk = abs(fcuk)
+    res = 0.002 + 0.5 * (_fcuk - 50) * 1e-5
+    if res < 0.002:
+        return 0.002
+    return res
 
 
-def eps_cu2(fck: float) -> float:
+def eps_cu2(fcuk: float) -> float:
     """The ultimate strain of the parabolic-rectangular law.
 
-    Defined in fib Model Code 2010 (2013), Table 7.2-1
+    Defined in GB50010 (2024), Eq (6.2.1-5)
 
     Args:
-        fck (float): The characteristic compressive strength of concrete in
-            MPa.
+        fcuk (float): The characteristic compressive strength of concrete in
+            MPa. (cube strength)
 
     Returns:
         float: The ultimate strain, absolute value, no unit.
     """
-    fck = abs(fck)
-    return (
-        3.5 / 1000
-        if fck <= 50
-        else (2.6 + 35 * ((90 - fck) / 100) ** 4) / 1000
-    )
+    _fcuk = abs(fcuk)
+    res = 0.0033 - 0.5 * (_fcuk - 50) * 1e-5
+    if res > 0.0033:
+        return 0.0033
+    return res
 
 
-def n_parabolic_rectangular(fck: float) -> float:
+def n_parabolic_rectangular(fcuk: float) -> float:
     """The exponent in the parabolic-rectangular law.
 
-    Defined in fib Model Code 2010 (2013), Table 7.2-1
+    Defined in GB50010 (2024), Eq (6. 2. 1-3)
 
     Args:
-        fck (float): The characteristic compressive strength of concrete in
-            MPa.
+        fcuk (float): The characteristic compressive strength of concrete in
+            MPa. (cube strength)
 
     Returns:
         float: The exponent n, absolute value, no unit.
     """
-    fck = abs(fck)
-    return 2.0 if fck <= 50 else (1.4 + 23.4 * ((90 - fck) / 100) ** 4)
+    _fcuk = abs(fcuk)
+    res = 2 - (_fcuk - 50) / 60
+    if res > 2.0:
+        return 2.0
+    return res
 
 
 # def eps_c3(fck: float) -> float:
